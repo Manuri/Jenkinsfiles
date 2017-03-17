@@ -1,0 +1,288 @@
+#!groovy
+import sun.misc.GThreadHelper
+
+String BUILD = "Build", RELEASE = "Release";
+String YES = "Yes", NO = "No";
+String expectedAction = BUILD;
+String yesOrNoChoice = "Yes\nNo";
+
+stage ('Request Build Or Release') {
+    String buildInputParams = "Build\nRelease";
+    expectedAction = input(
+            id: 'userInput', message: 'Please choose Build Or Release option', parameters: [
+            [$class: 'ChoiceParameterDefinition', defaultValue: 'Build', choices: buildInputParams, description: 'Build Or Release', name: 'build-or-release'],
+            [$class: 'ChoiceParameterDefinition', defaultValue: 'Yes', choices: yesOrNoChoice, description: 'Clean Or Keep dir', name: 'clean-dir']
+    ])
+}
+
+boolean isRelease = RELEASE.equals(expectedAction["build-or-release"]);
+boolean needCleanUp = YES.equals(expectedAction["clean-dir"]);
+
+def releaseParamInput, buildParamInput;
+
+String BALLERINA_REPO_NAME = "ballerina";
+String COMPOSER_REPO_NAME= "composer";
+String DOCERINA_REPO_NAME = "docerina";
+String TESTERINA_REPO_NAME = "testerina";
+String CONNECTORS_REPO_NAME = "connectors";
+String CONTAINER_SUPPORT_REPO_NAME = "container-support";
+String TOOLS_DIST_REPO_NAME = "tools-distribution";
+String TOOL_SWAGGER_REPO_NAME = "tool-swagger-ballerina";
+String BALLERINA_PARENT_REPO_NAME = "ballerina-parent";
+String SKIP_TESTS = "-skip-tests";
+
+String RELEASE_VERSION = "-release-version";
+String RELEASE_TAG = "-release-tag";
+String NEXT_DEV_VERSION = "-next-development-version";
+String VERSION_QUERY = "Please provide release version of ";
+String TAG_QUERY = "Please provide release tag of ";
+String NEXT_DEV_VERSION_QUERY = "Please provide next development version of ";
+
+String BAL_RELEASE_VERSION = BALLERINA_REPO_NAME + RELEASE_VERSION;
+String BAL_RELASE_TAG = BALLERINA_REPO_NAME + RELEASE_TAG;
+String BAL_NEXT_DEV_VERSION = BALLERINA_REPO_NAME + NEXT_DEV_VERSION;
+
+String COMPOSER_RELEASE_VERSION = COMPOSER_REPO_NAME + RELEASE_VERSION;
+String COMPOSER_RELEASE_TAG = COMPOSER_REPO_NAME + RELEASE_TAG;
+String COMPOSER_NEXT_DEV_VERSION = COMPOSER_REPO_NAME + NEXT_DEV_VERSION;
+
+String DOCERINA_RELEASE_VERSION = DOCERINA_REPO_NAME + RELEASE_VERSION;
+String DOCERINA_RELEASE_TAG = DOCERINA_REPO_NAME + RELEASE_TAG;
+String DOCERINA_NEXT_DEV_VERSION = DOCERINA_REPO_NAME + NEXT_DEV_VERSION;
+
+String TESTERINA_RELEASE_VERSION = TESTERINA_REPO_NAME + RELEASE_VERSION;
+String TESTERINA_RELEASE_TAG = TESTERINA_REPO_NAME + RELEASE_TAG;
+String TESTERINA_NEXT_DEV_VERSION = TESTERINA_REPO_NAME + NEXT_DEV_VERSION;
+
+String CONTAINER_SUPPORT_RELEASE_VERSION = CONTAINER_SUPPORT_REPO_NAME + RELEASE_VERSION;
+String CONTAINER_SUPPORT_RELEASE_TAG = CONTAINER_SUPPORT_REPO_NAME + RELEASE_TAG;
+String CONTAINER_SUPPORT_NEXT_DEV_VERSION = CONTAINER_SUPPORT_REPO_NAME + NEXT_DEV_VERSION;
+
+String CONNECTORS_RELEASE_VERSION = CONNECTORS_REPO_NAME + RELEASE_VERSION;
+String CONNECTORS_RELEASE_TAG = CONNECTORS_REPO_NAME + RELEASE_TAG;
+String CONNECTORS_NEXT_DEV_VERSION = CONNECTORS_REPO_NAME + NEXT_DEV_VERSION;
+
+String TOOL_SWAGGER_RELEASE_VERSION = TOOL_SWAGGER_REPO_NAME + RELEASE_VERSION;
+String TOOL_SWAGGER_RELEASE_TAG = TOOL_SWAGGER_REPO_NAME + RELEASE_TAG;
+String TOOL_SWAGGER_NEXT_DEV_VERSION = TOOLS_DIST_REPO_NAME + NEXT_DEV_VERSION;
+
+String TOOLS_DIST_RELEASE_VERSION = TOOLS_DIST_REPO_NAME + RELEASE_VERSION;
+String TOOLS_DIST_RELEASE_TAG = TOOLS_DIST_REPO_NAME + RELEASE_TAG;
+String TOOLS_DIST_NEXT_DEV_VERSION = TOOLS_DIST_REPO_NAME + NEXT_DEV_VERSION;
+
+String BALLERINA_SKIP_TESTS = BALLERINA_REPO_NAME + SKIP_TESTS;
+String COMPOSER_SKIP_TESTS = COMPOSER_REPO_NAME + SKIP_TESTS;
+String DOCERINA_SKIP_TESTS = DOCERINA_REPO_NAME + SKIP_TESTS;
+String TESTERINA_SKIP_TESTS = TESTERINA_REPO_NAME + SKIP_TESTS;
+String CONTAINER_SUPPORT_SKIP_TESTS = CONTAINER_SUPPORT_REPO_NAME + SKIP_TESTS;
+String CONNECTORS_SKIP_TESTS = CONNECTORS_REPO_NAME + SKIP_TESTS;
+String TOOL_SWAGGER_SKIP_TESTS = TOOL_SWAGGER_REPO_NAME + SKIP_TESTS;
+String TOOLS_DIST_SKIP_TESTS = TOOLS_DIST_REPO_NAME + SKIP_TESTS;
+
+if (isRelease) {
+    stage ('Get Version, Tag Parameters') {
+        String TEXT_PARAM_DEF_CLASS = "TextParameterDefinition";
+        String CHOICE_PARAM_DEF_CLASS = "ChoiceParameterDefinition";
+
+        releaseParamInput = input(
+                id: 'userInput', message: 'Please provide following parameters', parameters: [
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + BALLERINA_PARENT_REPO_NAME, name: BAL_PARENT_VERSION],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + BALLERINA_REPO_NAME, name: BAL_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + BALLERINA_REPO_NAME, name: BAL_RELASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + BALLERINA_REPO_NAME, name: BAL_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip ballerina Tests', name:BALLERINA_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + COMPOSER_REPO_NAME, name: COMPOSER_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + COMPOSER_REPO_NAME, name: COMPOSER_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + COMPOSER_REPO_NAME, name: COMPOSER_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip composer Tests', name: COMPOSER_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + DOCERINA_REPO_NAME, name: DOCERINA_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description:TAG_QUERY + DOCERINA_REPO_NAME, name: DOCERINA_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + DOCERINA_REPO_NAME, name: DOCERINA_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip docerina Tests', name: DOCERINA_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + TESTERINA_REPO_NAME, name: TESTERINA_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + TESTERINA_REPO_NAME, name: TESTERINA_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + TESTERINA_REPO_NAME, name: TESTERINA_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip testerina Tests', name: TESTERINA_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + CONTAINER_SUPPORT_REPO_NAME, name: CONTAINER_SUPPORT_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + CONTAINER_SUPPORT_REPO_NAME, name: CONTAINER_SUPPORT_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + CONTAINER_SUPPORT_REPO_NAME, name: CONTAINER_SUPPORT_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip container-support Tests', name: CONTAINER_SUPPORT_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + CONNECTORS_REPO_NAME, name: CONNECTORS_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + CONNECTORS_REPO_NAME, name: CONNECTORS_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + CONNECTORS_REPO_NAME, name: CONNECTORS_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip connectors Tests', name: CONNECTORS_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + TOOL_SWAGGER_REPO_NAME, name: TOOL_SWAGGER_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + TOOL_SWAGGER_REPO_NAME, name: TOOL_SWAGGER_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + TOOL_SWAGGER_REPO_NAME, name: TOOL_SWAGGER_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip tool-swagger-ballerina Tests', name: TOOL_SWAGGER_SKIP_TESTS],
+
+                [$class: TEXT_PARAM_DEF_CLASS, description: VERSION_QUERY + TOOLS_DIST_REPO_NAME, name: TOOLS_DIST_RELEASE_VERSION],
+                [$class: TEXT_PARAM_DEF_CLASS, description: TAG_QUERY + TOOLS_DIST_REPO_NAME, name: TOOLS_DIST_RELEASE_TAG],
+                [$class: TEXT_PARAM_DEF_CLASS, description: NEXT_DEV_VERSION_QUERY + TOOLS_DIST_REPO_NAME, name: TOOLS_DIST_NEXT_DEV_VERSION],
+                [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip tools-distribution Tests', name: TOOLS_DIST_SKIP_TESTS],
+        ]);
+    }
+} else {
+    buildParamInput = input(
+            id: 'userInput', message: 'Please provide following parameters', parameters: [
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip ballerina Tests', name:BALLERINA_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip composer Tests', name: COMPOSER_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip docerina Tests', name: DOCERINA_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip testerina Tests', name: TESTERINA_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip container-support Tests', name: CONTAINER_SUPPORT_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip connectors Tests', name: CONNECTORS_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip tool-swagger-ballerina Tests', name: TOOL_SWAGGER_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesOrNoChoice, description: 'Skip tools-distribution Tests', name: TOOLS_DIST_SKIP_TESTS],
+    ]);
+}
+
+node {
+    String user = env.GIT_USER;
+    String GIT_CREDENTIALS = env.GIT_CREDENTIALS_ID;
+    String SETTINGS_XML = env.SETTINGS_XML_ID;
+
+    stage ("Clone Repositories"){
+        parallel ballerinaParentClone : {
+            cloneRepository(BALLERINA_PARENT_REPO_NAME, user, GIT_CREDENTIALS);
+        }, ballerinaClone : {
+            cloneRepository(BALLERINA_REPO_NAME, user, GIT_CREDENTIALS);
+        }, composerClone: {
+            cloneRepository(COMPOSER_REPO_NAME, user, GIT_CREDENTIALS);
+        }, connectorsClone: {
+            cloneRepository(CONNECTORS_REPO_NAME, user, GIT_CREDENTIALS);
+        }, containerSupportClone: {
+            cloneRepository(CONTAINER_SUPPORT_REPO_NAME, user, GIT_CREDENTIALS);
+        }, docerinaClone: {
+            cloneRepository(DOCERINA_REPO_NAME, user, GIT_CREDENTIALS);
+        }, testerinaClone: {
+            cloneRepository(TESTERINA_REPO_NAME, user, GIT_CREDENTIALS);
+        }, toolsDistributionClone: {
+            cloneRepository(TOOLS_DIST_REPO_NAME, user, GIT_CREDENTIALS);
+        }, toolSwaggerBallerinaClone: {
+            cloneRepository(TOOL_SWAGGER_REPO_NAME, user, GIT_CREDENTIALS);
+        }, failFast: true
+    }
+
+    if (isRelease) {
+        stage("Release Repositories") {
+            parallel ballerinParentBuild: {
+                dir (BALLERINA_PARENT_REPO_NAME) {
+                    sh 'git checkout -b v' + BAL_PARENT_VERSION;
+                }
+                build(SETTINGS_XML, BALLERINA_PARENT_REPO_NAME, false);
+            }, ballerinaBuild: {
+                release(SETTINGS_XML, BALLERINA_REPO_NAME, releaseParamInput[BAL_RELEASE_VERSION],
+                        releaseParamInput[BAL_RELASE_TAG], releaseParamInput[BAL_NEXT_DEV_VERSION],
+                        releaseParamInput[BALLERINA_SKIP_TESTS]);
+            }, composerBuild: {
+                release(SETTINGS_XML, COMPOSER_REPO_NAME, releaseParamInput[COMPOSER_RELEASE_VERSION],
+                        releaseParamInput[COMPOSER_RELEASE_TAG], releaseParamInput[COMPOSER_NEXT_DEV_VERSION],
+                        releaseParamInput[COMPOSER_SKIP_TESTS]);
+            }, connectorsBuild: {
+                release(SETTINGS_XML, CONNECTORS_REPO_NAME, releaseParamInput[CONNECTORS_RELEASE_VERSION],
+                        releaseParamInput[CONNECTORS_RELEASE_TAG], releaseParamInput[CONNECTORS_NEXT_DEV_VERSION],
+                        releaseParamInput[CONNECTORS_SKIP_TESTS]);
+            }, containerSupportBuild: {
+                release(SETTINGS_XML, CONTAINER_SUPPORT_REPO_NAME, releaseParamInput[CONNECTORS_RELEASE_VERSION],
+                        releaseParamInput[CONNECTORS_RELEASE_TAG], releaseParamInput[CONNECTORS_NEXT_DEV_VERSION],
+                        releaseParamInput[CONNECTORS_SKIP_TESTS]);
+            }, docerinaBuild: {
+                release(SETTINGS_XML, DOCERINA_REPO_NAME, releaseParamInput[DOCERINA_RELEASE_VERSION],
+                        releaseParamInput[DOCERINA_RELEASE_TAG], releaseParamInput[DOCERINA_NEXT_DEV_VERSION],
+                        releaseParamInput[DOCERINA_SKIP_TESTS]);
+            }, testerinaBuild: {
+                release(SETTINGS_XML, TESTERINA_REPO_NAME, releaseParamInput[TESTERINA_RELEASE_VERSION],
+                        releaseParamInput[TESTERINA_RELEASE_TAG], releaseParamInput[TESTERINA_NEXT_DEV_VERSION],
+                        releaseParamInput[TESTERINA_SKIP_TESTS]);
+            }, toolsDistributionBuild: {
+                release(SETTINGS_XML, TOOLS_DIST_REPO_NAME, releaseParamInput[TOOLS_DIST_RELEASE_VERSION],
+                        releaseParamInput[TOOLS_DIST_RELEASE_TAG], releaseParamInput[TOOLS_DIST_NEXT_DEV_VERSION],
+                        releaseParamInput[TOOLS_DIST_SKIP_TESTS]);
+            }, toolSwaggerBuild: {
+                release(SETTINGS_XML, TOOL_SWAGGER_REPO_NAME, releaseParamInput[TOOL_SWAGGER_RELEASE_VERSION],
+                        releaseParamInput[TOOL_SWAGGER_RELEASE_TAG], releaseParamInput[TOOL_SWAGGER_NEXT_DEV_VERSION],
+                        releaseParamInput[TOOL_SWAGGER_SKIP_TESTS]);
+            }
+
+        }
+    } else {
+        stage("Build Repositories") {
+            parallel ballerinParentBuild: {
+                build(SETTINGS_XML, BALLERINA_PARENT_REPO_NAME, false );
+            }, ballerinaBuild: {
+                build(SETTINGS_XML, BALLERINA_REPO_NAME, buildParamInput[BALLERINA_SKIP_TESTS]);
+            }, composerBuild: {
+                build(SETTINGS_XML, COMPOSER_REPO_NAME, buildParamInput[COMPOSER_SKIP_TESTS]);
+            }, connectorsBuild: {
+                build(SETTINGS_XML, CONNECTORS_REPO_NAME, buildParamInput[CONNECTORS_SKIP_TESTS]);
+            }, containerSupportBuild: {
+                build(SETTINGS_XML, CONTAINER_SUPPORT_REPO_NAME, buildParamInput[CONTAINER_SUPPORT_SKIP_TESTS]);
+            }, docerinaBuild: {
+                build(SETTINGS_XML, DOCERINA_REPO_NAME, buildParamInput[DOCERINA_SKIP_TESTS]);
+            }, testerinaBuild: {
+                build(SETTINGS_XML, TESTERINA_REPO_NAME, buildParamInput[TESTERINA_SKIP_TESTS]);
+            }, toolsDistributionBuild: {
+                build(SETTINGS_XML, TOOLS_DIST_REPO_NAME, buildParamInput[TOOLS_DIST_SKIP_TESTS]);
+            }, toolSwaggerBuild: {
+                build(SETTINGS_XML, TOOL_SWAGGER_REPO_NAME, buildParamInput[TOOL_SWAGGER_SKIP_TESTS]);
+            }
+        }
+    }
+}
+
+
+def cloneRepository(String repositoryName, String user, String credentials) {
+    checkout([
+            $class: 'GitSCM',
+            branches: [[name: '*/master']],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [[$class: 'LocalBranch', localBranch: 'master'],
+                         [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
+            submoduleCfg: [],
+            userRemoteConfigs:
+                    [[credentialsId: credentials,
+                      url: "http://github.com/${user}/${repositoryName}.git"]]])
+}
+
+
+def build(String settingsXml, String repositoryDir, boolean skipTests) {
+    configFileProvider(
+            [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
+        dir(repositoryDir) {
+            sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
+        }
+    }
+}
+
+def release(String settingsXml, String repositoryDir, String releaseVersion, String releaseTag, String nextDevVersion, String skipTestsChoice) {
+    configFileProvider(
+            [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
+        dir(repositoryDir) {
+            sh 'git checkout -b release-' + releaseVersion;
+            if ("Yes".equals(skipTestsChoice)) {
+                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+            } else {
+                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
