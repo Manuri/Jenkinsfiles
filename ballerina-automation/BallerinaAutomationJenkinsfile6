@@ -360,6 +360,7 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
                     sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
                 } else {
+                    sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS clean install'
                 }
             }
