@@ -22,6 +22,7 @@ String containerSupportVersion, containerSupportReleaseTag, containerSupportDevV
 String connectorsVersion, connectorsReleaseTag, connectorsDevVersion, connectorsSkipTests;
 String toolSwaggerVersion, toolSwaggerReleaseTag, toolSwaggerDevVersion, toolSwaggerSkipTests;
 String toolsDistVersion, toolsDistReleaseTag, toolsDistDevVersion, toolsDistSkipTests;
+String ballerinaParentVersion;
 
 def releaseParamInput, buildParamInput;
 
@@ -31,6 +32,8 @@ String CHOICE_PARAM_DEF_CLASS = "ChoiceParameterDefinition";
 if (isRelease) {
     releaseParamInput = input(
             id: 'userInput', message: 'Please provide following parameters', parameters: [
+            [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Parent Version', name: 'ballerina-parent-version'],
+
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Release Version', name: 'ballerina-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Release Tag', name: 'ballerina-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Next Development Version', name: 'ballerina-next-development-version'],
@@ -71,6 +74,8 @@ if (isRelease) {
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tools-distribution Next Development Version', name: 'tools-distribution-next-development-version'],
             [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-tools-distrbution-tests'],
     ]);
+    ballerinaParentVersion = releaseParamInput['ballerina-parent-version'];
+
     ballerinaVersion = releaseParamInput['ballerina-release-version'];
     ballerinaReleaseTag = releaseParamInput['ballerina-release-tag'];
     ballerinaDevVersion = releaseParamInput['ballerina-next-development-version'];
@@ -114,6 +119,7 @@ if (isRelease) {
 } else {
     buildParamInput = input(
             id: 'userInput', message: 'Please provide following parameters', parameters: [
+            [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Parent Version', name: 'ballerina-parent-version'],
             [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip ballerina Tests', name: 'skip-ballerina-tests'],
             [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip composer Tests', name: 'skip-composer-tests'],
             [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip docerina Tests', name: 'skip-docerina-tests'],
@@ -124,6 +130,7 @@ if (isRelease) {
             [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tools-distribution Tests', name: 'skip-tools-distrbution-tests'],
     ]);
 
+    ballerinaParentVersion = releaseParamInput['ballerina-parent-version'];
     ballerinaSkipTests = buildParamInput['skip-ballerina-tests'];
     composerSkipTests = buildParamInput['skip-composer-tests'];
     docerinaSkipTests = buildParamInput['skip-docerina-tests'];
@@ -160,13 +167,13 @@ node {
     String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
 
     try {
-        /*cloneRepository(ballerinaParentRepository, user, gitCredentialsID);
+        cloneRepository(ballerinaParentRepository, user, gitCredentialsID);
         dir(ballerinaParentRepository) {
             sh(
-                    script: "git checkout tags/v0.84"
+                    script: "git checkout tags/v" + ballerinaParentVersion
             )
         }
-        build(settingsXMLID, ballerinaParentRepository, NO);*/
+        build(settingsXMLID, ballerinaParentRepository, NO);
 
         stage('Building ballerina') {
             cloneRepository(ballerinaRepository, user, gitCredentialsID);
@@ -330,6 +337,7 @@ def release(String settingsXml, String repositoryDir, String releaseVersion, Str
             sh("git checkout -b release-" + releaseVersion);
             withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
                 if ("Yes".equals(skipTests)) {
+                    sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
                 } else {
                     sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
@@ -346,6 +354,7 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
         dir(repositoryDir) {
             withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
                 if ("Yes".equals(skipTests)) {
+                    sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
                 } else {
                     sh 'mvn -s $MAVEN_SETTINGS clean install'
