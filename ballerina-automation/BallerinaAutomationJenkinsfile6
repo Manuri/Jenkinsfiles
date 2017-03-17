@@ -136,30 +136,30 @@ if (isRelease) {
     toolsDistSkipTests = buildParamInput['skip-tools-distrbution-tests'];
 }
 
-
-def tagMap = [];
-String user = env.GIT_USER;
-String gitCredentialsID = env.GIT_CREDENTIALS_ID;
-
-String maven = env.MAVEN_TOOL;
-String javaHome = env.JDK;
-env.PATH = "${tool maven}/bin:${env.PATH}"
-env.JAVA_HOME = "${tool javaHome}"
-env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
-
-String settingsXMLID = env.SETTINGS_XML_ID;
-String ballerinaRepository = "ballerina-temp";
-String composerRepository = "composer-temp";
-String docerinaRepository = "docerina-temp";
-String testerinaRepository = "testerina-temp";
-String connectorsRepository = "connectors-temp";
-String containerSupportRepository = "container-support-temp";
-String toolsDistributionRepository = "tools-distribution-temp";
-String toolSwaggerBallerinaRepository = "tool-swagger-ballerina-temp";
-String ballerinaParentRepository = "ballerina-parent";
-String ballerinaGroudId = "org.ballerinalang";
-String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
 node {
+    def tagMap = [];
+    String user = env.GIT_USER;
+    String gitCredentialsID = env.GIT_CREDENTIALS_ID;
+
+    String maven = env.MAVEN_TOOL;
+    String javaHome = env.JDK;
+    env.PATH = "${tool maven}/bin:${env.PATH}"
+    env.JAVA_HOME = "${tool javaHome}"
+    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+
+    String settingsXMLID = env.SETTINGS_XML_ID;
+    String ballerinaRepository = "ballerina-temp";
+    String composerRepository = "composer-temp";
+    String docerinaRepository = "docerina-temp";
+    String testerinaRepository = "testerina-temp";
+    String connectorsRepository = "connectors-temp";
+    String containerSupportRepository = "container-support-temp";
+    String toolsDistributionRepository = "tools-distribution-temp";
+    String toolSwaggerBallerinaRepository = "tool-swagger-ballerina-temp";
+    String ballerinaParentRepository = "ballerina-parent";
+    String ballerinaGroudId = "org.ballerinalang";
+    String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
+
     try {
         cloneRepository(ballerinaParentRepository, user, gitCredentialsID);
         dir(ballerinaParentRepository) {
