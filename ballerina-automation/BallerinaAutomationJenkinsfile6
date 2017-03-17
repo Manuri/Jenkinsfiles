@@ -146,12 +146,12 @@ node {
     String user = env.GIT_USER;
     String gitCredentialsID = env.GIT_CREDENTIALS_ID;
 
-    String maven = env.MAVEN_TOOL;
+    /*String maven = env.MAVEN_TOOL;
     //String javaHome = env.JDK;
     String javaHome = "Oracle-JDK-1.7.0_51";
     env.PATH = "${tool maven}/bin:${env.PATH}"
     env.JAVA_HOME = "${tool javaHome}"
-    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"*/
 
     String settingsXMLID = env.SETTINGS_XML_ID;
     String ballerinaRepository = "ballerina-temp";
@@ -336,12 +336,14 @@ def release(String settingsXml, String repositoryDir, String releaseVersion, Str
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
             sh("git checkout -b release-" + releaseVersion);
-            if ("Yes".equals(skipTests)) {
-                sh 'mvn --version'
-                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
-            } else {
-                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                if ("Yes".equals(skipTests)) {
+                    sh 'mvn --version'
+                    sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+                } else {
+                    sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
 
+                }
             }
         }
     }
@@ -351,12 +353,14 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
     configFileProvider(
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
-            if ("Yes".equals(skipTests)) {
-                sh 'mvn --version'
-                sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
-            } else {
-                sh 'mvn --version'
-                sh 'mvn -s $MAVEN_SETTINGS clean install'
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                if ("Yes".equals(skipTests)) {
+                    sh 'mvn --version'
+                    sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
+                } else {
+                    sh 'mvn --version'
+                    sh 'mvn -s $MAVEN_SETTINGS clean install'
+                }
             }
         }
     }
