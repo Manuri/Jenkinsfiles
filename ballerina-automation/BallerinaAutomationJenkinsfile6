@@ -14,6 +14,7 @@ stage('Request Build Or Release') {
 }
 
 boolean isRelease = RELEASE.equals(expectedAction['build-or-release']);
+println("is release " + isRelease);
 boolean needCleanUp = YES.equals(expectedAction['clean-dir']);
 
 String ballerinaVersion, ballerinaReleaseTag, ballerinaDevVersion, ballerinaSkipTests;
@@ -158,6 +159,7 @@ node {
     String toolSwaggerBallerinaRepository = "tool-swagger-ballerina-temp";
     String ballerinaParentRepository = "ballerina-parent";
     String ballerinaGroudId = "org.ballerinalang";
+    String ballerinaConnectorsGroupId = "org.wso2.ballerina.connectors"
     String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
 
     try {
@@ -255,7 +257,7 @@ node {
         stage('Building tools-distribution') {
             cloneRepository(toolsDistributionRepository, user, gitCredentialsID);
             updateProperties(toolsDistributionRepository, settingsXMLID, propertyUpdateCommitMessage,
-                    "${ballerinaGroudId}:*", !isRelease);
+                    "${ballerinaGroudId}:*,${ballerinaConnectorsGroupId}:connectors", !isRelease);
             if (isRelease) {
                 tagMap.add([toolsDistributionRepository, toolsDistReleaseTag, toolsDistVersion]);
                 release(settingsXMLID, toolsDistributionRepository, toolsDistVersion, toolsDistReleaseTag, toolsDistDevVersion, toolsDistSkipTests);
