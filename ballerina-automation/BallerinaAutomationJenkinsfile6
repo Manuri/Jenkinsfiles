@@ -4,17 +4,14 @@ String YES = "Yes", NO = "No";
 def expectedAction;
 String yesNoString = "${YES}\n${NO}";
 
-stage('Request Build Or Release') {
-    String buildInputParams = "${BUILD}\n${RELEASE}";
-    expectedAction = input(
-            id: 'userInput', message: 'Please choose Build Or Release option', parameters: [
-            [$class: 'ChoiceParameterDefinition', defaultValue: BUILD, choices: buildInputParams, description: 'Build Or Release', name: 'build-or-release'],
-            [$class: 'ChoiceParameterDefinition', defaultValue: YES, choices: yesNoString, description: 'Clean Or Keep dir', name: 'clean-dir']
-    ]);
-}
+String buildInputParams = "${BUILD}\n${RELEASE}";
+expectedAction = input(
+        id: 'userInput', message: 'Please choose Build Or Release option', parameters: [
+        [$class: 'ChoiceParameterDefinition', defaultValue: BUILD, choices: buildInputParams, description: 'Build Or Release', name: 'build-or-release'],
+        [$class: 'ChoiceParameterDefinition', defaultValue: YES, choices: yesNoString, description: 'Clean Or Keep dir', name: 'clean-dir']
+]);
 
 boolean isRelease = RELEASE.equals(expectedAction['build-or-release']);
-println("is release " + isRelease);
 boolean needCleanUp = YES.equals(expectedAction['clean-dir']);
 
 String ballerinaVersion, ballerinaReleaseTag, ballerinaDevVersion, ballerinaSkipTests;
@@ -142,11 +139,11 @@ node {
     String user = env.GIT_USER;
     String gitCredentialsID = env.GIT_CREDENTIALS_ID;
 
-    String maven = env.MAVEN_TOOL;
-    String javaHome = env.JDK;
-    env.PATH = "${tool maven}/bin:${env.PATH}"
-    env.JAVA_HOME = "${tool javaHome}"
-    env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+   // String maven = env.MAVEN_TOOL;
+   // String javaHome = env.JDK;
+    //env.PATH = "${tool maven}/bin:${env.PATH}"
+    //env.JAVA_HOME = "${tool javaHome}"
+    //env.PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
 
     String settingsXMLID = env.SETTINGS_XML_ID;
     String ballerinaRepository = "ballerina-temp";
@@ -182,7 +179,7 @@ node {
 
         }
 
-        stage('Building docerina, testerina, connectors, container-support') {
+        stage('Building composer, docerina, testerina, connectors, container-support, tool-swagger-ballerina') {
             parallel composerBuild: {
                 cloneRepository(composerRepository, user, gitCredentialsID);
                 updateProperties(composerRepository, settingsXMLID, propertyUpdateCommitMessage,
@@ -267,7 +264,7 @@ node {
 
         }
     } catch (Exception e) {
-        sh "echo 'An exception has occurred in during the build process'";
+        println("An exception has occurred in during the build process");
         if (isRelease) {
             for (entry in tagMap) {
                 cleanupRepositoryAfterFailure(entry[0].toString(), user, entry[1].toString(), entry[2].toString(), gitCredentialsID)
@@ -281,10 +278,10 @@ node {
                 try {
                     deleteDir();
                 } catch (Exception e) {
-                    sh("echo 'Unable to delete directory. Please manually delete'");
+                    println("Unable to delete directory. Please manually delete");
                 }
             } else {
-                sh("echo 'You have chosen not to clean the workspace'");
+                println("You have chosen not to clean the workspace");
             }
         }
     }
@@ -295,7 +292,7 @@ def cloneRepository(String repositoryName, String user, String credentials) {
             $class                           : 'GitSCM',
             branches                         : [[name: '*/master']],
             doGenerateSubmoduleConfigurations: false,
-            extensions                       : [[$class: 'LocalBranch', localBranch: 'release-0.84'],
+            extensions                       : [[$class: 'LocalBranch', localBranch: 'master'],
                                                 [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
             submoduleCfg                     : [],
             userRemoteConfigs                :
@@ -304,22 +301,23 @@ def cloneRepository(String repositoryName, String user, String credentials) {
 }
 
 def updateProperties(String repositoryName, String settingsXml, String commitMessage, String propertiesList, boolean allowSnapshots) {
-
     configFileProvider(
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryName) {
-            if (!allowSnapshots) {
-                sh "mvn -s $MAVEN_SETTINGS versions:update-properties -Dincludes=${propertiesList}"
-            } else {
-                sh "mvn -s $MAVEN_SETTINGS versions:update-properties -Dincludes=${propertiesList} -DallowSnapshots=true"
-            }
-            boolean changesPresent = sh(
-                    script: "git diff-index --quiet HEAD",
-                    returnStatus: true
-            ) == 1
-            if (changesPresent) {
-                sh("git add -u")
-                sh("git commit -m '${commitMessage}'");
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                if (!allowSnapshots) {
+                    sh "mvn -s $MAVEN_SETTINGS versions:update-properties -Dincludes=${propertiesList}"
+                } else {
+                    sh "mvn -s $MAVEN_SETTINGS versions:update-properties -Dincludes=${propertiesList} -DallowSnapshots=true"
+                }
+                boolean changesPresent = sh(
+                        script: "git diff-index --quiet HEAD",
+                        returnStatus: true
+                ) == 1
+                if (changesPresent) {
+                    sh("git add -u")
+                    sh("git commit -m '${commitMessage}'");
+                }
             }
         }
     }
@@ -329,11 +327,14 @@ def release(String settingsXml, String repositoryDir, String releaseVersion, Str
     configFileProvider(
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
-            if ("Yes".equals(skipTests)) {
-                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
-            } else {
-                sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+            sh("git checkout -b release-" + releaseVersion);
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                if ("Yes".equals(skipTests)) {
+                    sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true -DskipTests=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
+                } else {
+                    sh 'mvn -s $MAVEN_SETTINGS release:prepare release:perform -B -Darguments="-Dmaven.deploy.skip=true" -DreleaseVersion=' + releaseVersion + ' -Dtag=' + releaseTag + ' -DdevelopmentVersion=' + nextDevVersion;
 
+                }
             }
         }
     }
@@ -343,17 +344,19 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
     configFileProvider(
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
-            if ("Yes".equals(skipTests)) {
-                sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
-            } else {
-                sh 'mvn -s $MAVEN_SETTINGS clean install'
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                if ("Yes".equals(skipTests)) {
+                    sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
+                } else {
+                    sh 'mvn -s $MAVEN_SETTINGS clean install'
+                }
             }
         }
     }
 }
 
 def cleanupRepositoryAfterFailure(String repositoryName, String user, String releaseTag, String releaseVersion, String credentials) {
-    sh "echo 'Cleaning up ${repositoryName} repository.'";
+    println("Cleaning up ${repositoryName} repository.");
     dir(repositoryName) {
         withCredentials(
                 [[$class          : 'UsernamePasswordMultiBinding',
@@ -361,12 +364,12 @@ def cleanupRepositoryAfterFailure(String repositoryName, String user, String rel
                   usernameVariable: 'GIT_USERNAME',
                   passwordVariable: 'GIT_PASSWORD']]) {
             sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${user}/${repositoryName}.git")
-            sh "echo 'Deleting tag ${latestTagAfterRelease} of ${repositoryName}'";
+            println("Deleting tag ${latestTagAfterRelease} of ${repositoryName}");
             sh(
                     script: "git push --delete origin ${releaseTag}",
                     returnStatus: true
             );
-            sh "echo 'Deleting release branch of ${repositoryName}'";
+            println("Deleting release branch of ${repositoryName}");
             sh(
                     script: "git push --delete origin release-" + releaseVersion,
                     returnStatus: true
