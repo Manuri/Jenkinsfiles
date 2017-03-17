@@ -116,14 +116,14 @@ if (isRelease) {
 } else {
     buildParamInput = input(
             id: 'userInput', message: 'Please provide following parameters', parameters: [
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip ballerina Tests', name: BALLERINA_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip composer Tests', name: COMPOSER_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip docerina Tests', name: DOCERINA_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip testerina Tests', name: TESTERINA_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip container-support Tests', name: CONTAINER_SUPPORT_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip connectors Tests', name: CONNECTORS_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tool-swagger-ballerina Tests', name: TOOL_SWAGGER_SKIP_TESTS],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tools-distribution Tests', name: TOOLS_DIST_SKIP_TESTS],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip ballerina Tests', name: 'skip-ballerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip composer Tests', name: 'skip-composer-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip docerina Tests', name: 'skip-docerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip testerina Tests', name: 'skip-testerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip container-support Tests', name: 'skip-container-support-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip connectors Tests', name: 'skip-connectors-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tool-swagger-ballerina Tests', name: 'skip-tool-swagger-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tools-distribution Tests', name: 'skip-tools-distrbution-tests'],
     ]);
 
     ballerinaSkipTests = buildParamInput['skip-ballerina-tests'];
