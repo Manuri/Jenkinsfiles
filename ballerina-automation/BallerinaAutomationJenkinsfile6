@@ -2,7 +2,7 @@
 String BUILD = "Build", RELEASE = "Release";
 String YES = "Yes", NO = "No";
 def expectedAction;
-String yesNoString = "${YES}\n${NO}";
+String yesNoString = "${NO}\n${YES}";
 
 String buildInputParams = "${BUILD}\n${RELEASE}";
 expectedAction = input(
@@ -37,42 +37,42 @@ if (isRelease) {
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Release Version', name: 'ballerina-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Release Tag', name: 'ballerina-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Next Development Version', name: 'ballerina-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-ballerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-ballerina-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Composer Release Version', name: 'composer-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Composer Release Tag', name: 'composer-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Composer Next Development Version', name: 'composer-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-composer-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-composer-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Docerina Release Version', name: 'docerina-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Docerina Release Tag', name: 'docerina-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Docerina Next Development Version', name: 'docerina-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-docerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-docerina-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Testerina Release Version', name: 'testerina-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Testerina Release Tag', name: 'testerina-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Testerina Next Development Version', name: 'testerina-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-testerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-testerina-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide container-support Release Version', name: 'container-support-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide container-support Release Tag', name: 'container-support-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide container-support Next Development Version', name: 'container-support-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-container-support-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-container-support-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide connectors Release Version', name: 'connectors-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide connectors Release Tag', name: 'connectors-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide connectors Next Development Version', name: 'connectors-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-connectors-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-connectors-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tool-swagger-ballerina Release Version', name: 'tool-swagger-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tool-swagger-ballerina Release Tag', name: 'tool-swagger-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tool-swagger-ballerina Next Development Version', name: 'tool-swagger-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-tool-swagger-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-tool-swagger-tests'],
 
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tools-distribution Release Version', name: 'tools-distribution-release-version'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tools-distribution Release Tag', name: 'tools-distribution-release-tag'],
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide tools-distribution Next Development Version', name: 'tools-distribution-next-development-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: 'No', choices: yesNoString, description: 'Skip Tests', name: 'skip-tools-distrbution-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip Tests', name: 'skip-tools-distrbution-tests'],
     ]);
     ballerinaParentVersion = releaseParamInput['ballerina-parent-version'];
 
@@ -120,14 +120,14 @@ if (isRelease) {
     buildParamInput = input(
             id: 'userInput', message: 'Please provide following parameters', parameters: [
             [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Parent Version', name: 'ballerina-parent-version'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip ballerina Tests', name: 'skip-ballerina-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip composer Tests', name: 'skip-composer-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip docerina Tests', name: 'skip-docerina-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip testerina Tests', name: 'skip-testerina-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip container-support Tests', name: 'skip-container-support-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip connectors Tests', name: 'skip-connectors-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tool-swagger-ballerina Tests', name: 'skip-tool-swagger-tests'],
-            [$class: CHOICE_PARAM_DEF_CLASS, defaultValue: NO, choices: yesNoString, description: 'Skip tools-distribution Tests', name: 'skip-tools-distrbution-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip ballerina Tests', name: 'skip-ballerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip composer Tests', name: 'skip-composer-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip docerina Tests', name: 'skip-docerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip testerina Tests', name: 'skip-testerina-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip container-support Tests', name: 'skip-container-support-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip connectors Tests', name: 'skip-connectors-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip tool-swagger-ballerina Tests', name: 'skip-tool-swagger-tests'],
+            [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip tools-distribution Tests', name: 'skip-tools-distrbution-tests'],
     ]);
 
     ballerinaParentVersion = releaseParamInput['ballerina-parent-version'];
@@ -161,7 +161,7 @@ node {
     String containerSupportRepository = "container-support-temp";
     String toolsDistributionRepository = "tools-distribution-temp";
     String toolSwaggerBallerinaRepository = "tool-swagger-ballerina-temp";
-    String ballerinaParentRepository = "ballerina-parent";
+    String ballerinaParentRepository = "ballerina-parent-1";
     String ballerinaGroudId = "org.ballerinalang";
     String ballerinaConnectorsGroupId = "org.wso2.ballerina.connectors"
     String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
