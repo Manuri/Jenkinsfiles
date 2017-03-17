@@ -130,7 +130,7 @@ if (isRelease) {
             [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip tools-distribution Tests', name: 'skip-tools-distrbution-tests'],
     ]);
 
-    ballerinaParentVersion = releaseParamInput['ballerina-parent-version'];
+    ballerinaParentVersion = buildParamInput['ballerina-parent-version'];
     ballerinaSkipTests = buildParamInput['skip-ballerina-tests'];
     composerSkipTests = buildParamInput['skip-composer-tests'];
     docerinaSkipTests = buildParamInput['skip-docerina-tests'];
@@ -353,6 +353,9 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
             withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+                println(env.JAVA_HOME);
+                println(env.JDK);
+                println(env.MAVEN_TOOL);
                 if ("Yes".equals(skipTests)) {
                     sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
