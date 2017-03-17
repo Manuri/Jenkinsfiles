@@ -1,16 +1,16 @@
 #!groovy
 String BUILD = "Build", RELEASE = "Release";
 String YES = "Yes", NO = "No";
-String expectedAction = BUILD;
-String yesNoString = "Yes\nNo";
+def expectedAction;
+String yesNoString = "${YES}\n${NO}";
 
 stage('Request Build Or Release') {
-    String buildInputParams = "Build\nRelease";
+    String buildInputParams = "${BUILD}\n${RELEASE}";
     expectedAction = input(
             id: 'userInput', message: 'Please choose Build Or Release option', parameters: [
-            [$class: 'ChoiceParameterDefinition', defaultValue: 'Build', choices: buildInputParams, description: 'Build Or Release', name: 'build-or-release'],
-            [$class: 'ChoiceParameterDefinition', defaultValue: 'Yes', choices: yesNoString, description: 'Clean Or Keep dir', name: 'clean-dir']
-    ])
+            [$class: 'ChoiceParameterDefinition', defaultValue: BUILD, choices: buildInputParams, description: 'Build Or Release', name: 'build-or-release'],
+            [$class: 'ChoiceParameterDefinition', defaultValue: YES, choices: yesNoString, description: 'Clean Or Keep dir', name: 'clean-dir']
+    ]);
 }
 
 boolean isRelease = RELEASE.equals(expectedAction['build-or-release']);
