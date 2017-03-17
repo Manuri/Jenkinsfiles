@@ -373,7 +373,7 @@ def cleanupRepositoryAfterFailure(String repositoryName, String user, String rel
                   usernameVariable: 'GIT_USERNAME',
                   passwordVariable: 'GIT_PASSWORD']]) {
             sh("git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${user}/${repositoryName}.git")
-            println("Deleting tag ${latestTagAfterRelease} of ${repositoryName}");
+            println("Deleting tag ${releaseTag} of ${repositoryName}");
             sh(
                     script: "git push --delete origin ${releaseTag}",
                     returnStatus: true
