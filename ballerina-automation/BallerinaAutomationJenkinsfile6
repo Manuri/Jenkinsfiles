@@ -352,7 +352,7 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
     configFileProvider(
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
-            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool 'apache-maven-3.2.2'}/bin:${env.JAVA_HOME}/bin"]) {
                 println(env.JAVA_HOME);
                 println(env.JDK);
                 println(env.MAVEN_TOOL);
