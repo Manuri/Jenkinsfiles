@@ -355,7 +355,8 @@ def build(String settingsXml, String repositoryDir, String skipTests) {
             [configFile(fileId: settingsXml, variable: 'MAVEN_SETTINGS')]) {
         dir(repositoryDir) {
             //withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin:${env.JAVA_HOME}/bin"]) {
-            withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin"]) {
+            //withEnv(["JAVA_HOME=${ tool env.JDK }", "PATH+MAVEN=${tool env.MAVEN_TOOL}/bin"]) {
+            withEnv(["JAVA_HOME=${ tool env.JDK }", "MAVEN_HOME=${tool env.MAVEN_TOOL}"]) {
                 if ("Yes".equals(skipTests)) {
                     sh 'mvn --version'
                     sh 'mvn -s $MAVEN_SETTINGS clean install -DskipTests=true'
