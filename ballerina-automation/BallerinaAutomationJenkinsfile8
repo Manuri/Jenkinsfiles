@@ -134,7 +134,7 @@ if (isRelease) {
 } else {
     buildParamInput = input(
             id: 'userInput', message: 'Please provide following parameters', parameters: [
-            [$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Parent Version', name: 'ballerina-parent-version'],
+            /*[$class: TEXT_PARAM_DEF_CLASS, description: 'Please provide Ballerina Parent Version', name: 'ballerina-parent-version'],*/
             [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip ballerina Tests', name: 'skip-ballerina-tests'],
             [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip composer Tests', name: 'skip-composer-tests'],
             [$class: CHOICE_PARAM_DEF_CLASS, choices: yesNoString, description: 'Skip docerina Tests', name: 'skip-docerina-tests'],
