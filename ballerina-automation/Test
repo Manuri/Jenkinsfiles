@@ -198,6 +198,17 @@ node ('US01') {
             }
         }
 
+        cloneRepository(composerRepository, user, gitCredentialsID);
+        updateParent(composerRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+        updateProperties(composerRepository, settingsXMLID, propertyUpdateCommitMessage,
+                "${ballerinaGroudId}:*", !isRelease);
+        if (isRelease) {
+            tagMap.add([composerRepository, composerReleaseTag, composerVersion]);
+            release(settingsXMLID, composerRepository, composerVersion, composerReleaseTag, composerDevVersion, composerSkipTests);
+        } else {
+            build(settingsXMLID, composerRepository, composerSkipTests);
+        }
+
         stage('Building docerina') {
             cloneRepository(docerinaRepository, user, gitCredentialsID);
             updateParent(docerinaRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
@@ -226,7 +237,7 @@ node ('US01') {
 
         stage('Building composer, testerina, connectors, container-support, tool-swagger-ballerina') {
             parallel composerBuild: {
-                cloneRepository(composerRepository, user, gitCredentialsID);
+                /*cloneRepository(composerRepository, user, gitCredentialsID);
                 updateParent(composerRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
                 updateProperties(composerRepository, settingsXMLID, propertyUpdateCommitMessage,
                         "${ballerinaGroudId}:*", !isRelease);
@@ -235,7 +246,7 @@ node ('US01') {
                     release(settingsXMLID, composerRepository, composerVersion, composerReleaseTag, composerDevVersion, composerSkipTests);
                 } else {
                     build(settingsXMLID, composerRepository, composerSkipTests);
-                }
+                }*/
             }, testerinaBuild: {
                 cloneRepository(testerinaRepository, user, gitCredentialsID);
                 updateParent(testerinaRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
