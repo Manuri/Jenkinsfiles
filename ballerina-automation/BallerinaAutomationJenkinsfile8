@@ -180,6 +180,19 @@ node ('US01'){
     String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
 
     try {
+
+        ////
+        cloneRepository(containerSupportRepository, user, gitCredentialsID);
+        updateProperties(containerSupportRepository, settingsXMLID, propertyUpdateCommitMessage,
+                "${ballerinaGroudId}:*", !isRelease);
+        if (isRelease) {
+            tagMap.add([containerSupportRepository, containerSupportReleaseTag, containerSupportVersion]);
+            release(settingsXMLID, containerSupportRepository, containerSupportVersion, containerSupportReleaseTag, containerSupportDevVersion, containerSupportSkipTests);
+        } else {
+            build(settingsXMLID, containerSupportRepository, containerSupportSkipTests);
+        }
+
+        ///
         stage('Building ballerina-parent') {
             cloneRepository(ballerinaParentRepository, user, gitCredentialsID);
             if (isRelease) {
