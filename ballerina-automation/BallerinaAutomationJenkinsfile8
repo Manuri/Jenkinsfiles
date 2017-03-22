@@ -159,6 +159,8 @@ if (isRelease) {
 }
 
 node ('US01'){
+    def user = env.BUILD_USER_ID;
+    sh "echo ${user}";
     def tagMap = [];
     String user = env.GIT_USER;
     String gitCredentialsID = env.GIT_CREDENTIALS_ID;
