@@ -173,16 +173,16 @@ node ("${nodeLabel}") {
     String user = env.GIT_USER;
     String gitCredentialsID = env.GIT_CREDENTIALS_ID;
     String settingsXMLID = env.SETTINGS_XML_ID;
-    String ballerinaRepository = "ballerina-temp";
-    String composerRepository = "composer-temp";
-    String docerinaRepository = "docerina-temp";
-    String testerinaRepository = "testerina-temp";
-    String connectorsRepository = "connectors-temp";
-    String containerSupportRepository = "container-support-temp";
-    String toolsDistributionRepository = "tools-distribution-temp";
-    String toolSwaggerBallerinaRepository = "tool-swagger-ballerina-temp";
-    String pluginMavenRepository = "plugin-maven-temp";
-    String ballerinaParentRepository = "ballerina-parent-temp";
+    String ballerinaRepository = "ballerina";
+    String composerRepository = "composer";
+    String docerinaRepository = "docerina";
+    String testerinaRepository = "testerina";
+    String connectorsRepository = "connectors";
+    String containerSupportRepository = "container-support";
+    String toolsDistributionRepository = "tools-distribution";
+    String toolSwaggerBallerinaRepository = "tool-swagger-ballerina";
+    String pluginMavenRepository = "plugin-maven";
+    String ballerinaParentRepository = "ballerina-parent";
     String ballerinaGroudId = "org.ballerinalang";
     String ballerinaConnectorsGroupId = "org.wso2.ballerina.connectors"
     String propertyUpdateCommitMessage = "Updating versions of org.ballerinalang.* dependencies";
@@ -223,6 +223,8 @@ node ("${nodeLabel}") {
                 tagMap.add([docerinaRepository, docerinaReleaseTag, docerinaVersion]);
                 release(settingsXMLID, docerinaRepository, docerinaVersion, docerinaReleaseTag, docerinaDevVersion, docerinaSkipTests);
                 updateParent(docerinaRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                updateProperties(docerinaRepository, settingsXMLID, propertyUpdateCommitMessage,
+                        "${ballerinaGroudId}:*", true);
                 pushCurrentBranch(docerinaRepository, gitCredentialsID, user);
             } else {
                 build(settingsXMLID, docerinaRepository, docerinaSkipTests);
@@ -238,6 +240,8 @@ node ("${nodeLabel}") {
                 tagMap.add([pluginMavenRepository, pluginMavenReleaseTag, pluginMavenVersion]);
                 release(settingsXMLID, pluginMavenRepository, pluginMavenVersion, pluginMavenReleaseTag, pluginMavenDevVersion, pluginMavenSkipTests);
                 updateParent(pluginMavenRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                updateProperties(pluginMavenRepository, settingsXMLID, propertyUpdateCommitMessage,
+                        "${ballerinaGroudId}:docerina", true);
                 pushCurrentBranch(pluginMavenRepository, gitCredentialsID, user);
             } else {
                 build(settingsXMLID, pluginMavenRepository, pluginMavenSkipTests);
@@ -254,6 +258,8 @@ node ("${nodeLabel}") {
                     tagMap.add([composerRepository, composerReleaseTag, composerVersion]);
                     release(settingsXMLID, composerRepository, composerVersion, composerReleaseTag, composerDevVersion, composerSkipTests);
                     updateParent(composerRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                    updateProperties(composerRepository, settingsXMLID, propertyUpdateCommitMessage,
+                            "${ballerinaGroudId}:*", true);
                     pushCurrentBranch(composerRepository, gitCredentialsID, user);
                 } else {
                     build(settingsXMLID, composerRepository, composerSkipTests);
@@ -267,6 +273,8 @@ node ("${nodeLabel}") {
                     tagMap.add([testerinaRepository, testerinaReleaseTag, testerinaVersion]);
                     release(settingsXMLID, testerinaRepository, testerinaVersion, testerinaReleaseTag, testerinaDevVersion, testerinaSkipTests);
                     updateParent(testerinaRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                    updateProperties(testerinaRepository, settingsXMLID, propertyUpdateCommitMessage,
+                            "${ballerinaGroudId}:*", true);
                     pushCurrentBranch(testerinaRepository, gitCredentialsID, user);
                 } else {
                     build(settingsXMLID, testerinaRepository, testerinaSkipTests);
@@ -280,6 +288,8 @@ node ("${nodeLabel}") {
                     tagMap.add([connectorsRepository, connectorsReleaseTag, connectorsVersion]);
                     release(settingsXMLID, connectorsRepository, connectorsVersion, connectorsReleaseTag, connectorsDevVersion, connectorsSkipTests);
                     updateParent(connectorsRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                    updateProperties(connectorsRepository, settingsXMLID, propertyUpdateCommitMessage,
+                            "${ballerinaGroudId}:*", true);
                     pushCurrentBranch(connectorsRepository, gitCredentialsID, user);
                 } else {
                     build(settingsXMLID, connectorsRepository, connectorsSkipTests);
@@ -293,6 +303,8 @@ node ("${nodeLabel}") {
                     tagMap.add([containerSupportRepository, containerSupportReleaseTag, containerSupportVersion]);
                     release(settingsXMLID, containerSupportRepository, containerSupportVersion, containerSupportReleaseTag, containerSupportDevVersion, containerSupportSkipTests);
                     updateParent(containerSupportRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                    updateProperties(containerSupportRepository, settingsXMLID, propertyUpdateCommitMessage,
+                            "${ballerinaGroudId}:*", true);
                     pushCurrentBranch(containerSupportRepository, gitCredentialsID, user);
                 } else {
                     build(settingsXMLID, containerSupportRepository, containerSupportSkipTests);
@@ -306,6 +318,8 @@ node ("${nodeLabel}") {
                     tagMap.add([toolSwaggerBallerinaRepository, toolSwaggerReleaseTag, toolSwaggerVersion]);
                     release(settingsXMLID, toolSwaggerBallerinaRepository, toolSwaggerVersion, toolSwaggerReleaseTag, toolSwaggerDevVersion, toolSwaggerSkipTests);
                     updateParent(toolSwaggerBallerinaRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                    updateProperties(toolSwaggerBallerinaRepository, settingsXMLID, propertyUpdateCommitMessage,
+                            "${ballerinaGroudId}:*", true);
                     pushCurrentBranch(toolSwaggerBallerinaRepository, gitCredentialsID, user);
                 } else {
                     build(settingsXMLID, toolSwaggerBallerinaRepository, toolSwaggerSkipTests);
@@ -322,6 +336,8 @@ node ("${nodeLabel}") {
                 tagMap.add([toolsDistributionRepository, toolsDistReleaseTag, toolsDistVersion]);
                 release(settingsXMLID, toolsDistributionRepository, toolsDistVersion, toolsDistReleaseTag, toolsDistDevVersion, toolsDistSkipTests);
                 updateParent(toolsDistributionRepository, settingsXMLID, parentUpdateCommitMessage, !isRelease);
+                updateProperties(toolsDistributionRepository, settingsXMLID, propertyUpdateCommitMessage,
+                        "${ballerinaGroudId}:*,${ballerinaConnectorsGroupId}:connectors", true);
                 pushCurrentBranch(toolsDistributionRepository, gitCredentialsID, user);
             } else {
                 build(settingsXMLID, toolsDistributionRepository, toolsDistSkipTests);
