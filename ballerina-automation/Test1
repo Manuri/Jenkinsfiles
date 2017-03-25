@@ -398,9 +398,9 @@ node ("${nodeLabel}") {
 def cloneRepository(String repositoryName, String user, String credentials) {
     checkout([
             $class                           : 'GitSCM',
-            branches                         : [[name: '*/master']],
+            branches                         : [[name: '*/wso2-master']],
             doGenerateSubmoduleConfigurations: false,
-            extensions                       : [[$class: 'LocalBranch', localBranch: 'master'],
+            extensions                       : [[$class: 'LocalBranch', localBranch: 'wso2-master'],
                                                 [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
             submoduleCfg                     : [],
             userRemoteConfigs                :
